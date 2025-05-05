@@ -3,10 +3,11 @@ const Bill = require('../models/bill_model')
 const createBill = async (req, res) => {
     try {
         const { date, amount, proof, description, status, type } = req.body
-        const bill = new Bill({ date, amount, proof, description, status, type })
+        const { id } = req.user
+        const bill = new Bill({ date, amount, proof, description, status, type, user: id })
         await bill.save()
         res.status(201).json(bill)
-    } catch (error) {
+    } catch (error) { 
         if (error['cause'] === 400) {
             res.status(400).json({ message: error.message })
         } else {
@@ -17,7 +18,13 @@ const createBill = async (req, res) => {
 
 const getBills = async (req, res) => {
     try {
-        const bills = await Bill.find({})
+        const { id, role } = req.user
+        let bills
+        if (role === 'admin') {
+            bills = await Bill.find({})
+        } else {
+            bills = await Bill.find({ user: id })
+        }
         res.status(200).json(bills)
     } catch (error) {
         res.status(500).json({ message: "Server error" })

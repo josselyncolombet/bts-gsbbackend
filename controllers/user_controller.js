@@ -1,3 +1,4 @@
+const { sha256 } = require('js-sha256')
 const User = require('../models/user_model')
 
 const createUser = async (req, res) => {
@@ -17,7 +18,9 @@ const createUser = async (req, res) => {
 
 const getUsers = async (req, res) => {
     try {
-        const users = await User.find({})
+        // if email is provided, find user by email else find all users
+        const email = req.query.email ? {email: req.query.email} : {}
+        const users = await User.find(email)
         res.status(200).json(users)
     } catch (error) {
         res.status(500).json({ message: "Server error" })
@@ -46,7 +49,8 @@ const updateUser = async (req, res) => {
     try {
         const { email } = req.query
         const { name, newEmail, password, role } = req.body
-        const user = await User.findOneAndUpdate({ email }, { name, email: newEmail, password, role }, { new: true })
+        const newPassword = password && sha256(password)
+        const user = await User.findOneAndUpdate({ email }, { name, email: newEmail, password: newPassword, role }, { new: true })
         if (!user) {
             throw new Error('User not found', { cause: 404 })
         } else {

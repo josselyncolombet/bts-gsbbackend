@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const sha256 = require('js-sha256')
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -13,10 +14,6 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-    },
-    bills: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: 'Bills',
     },
     role: {
         type: String,
@@ -33,6 +30,7 @@ userSchema.pre('save', async function(next) {
     if (existingUser) {
         throw new Error('User already exists', { cause: 400 })
     }
+    this.password = sha256(this.password + process.env.SALT)
     next()
 })
 

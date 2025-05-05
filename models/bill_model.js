@@ -17,6 +17,10 @@ const billSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
   status: {
     type: String,
     required: true,
@@ -30,5 +34,5 @@ const billSchema = new mongoose.Schema({
     default: Date.now(),
   },
 })
-const Bill = mongoose.model('Bills', billsSchema)
+const Bill = mongoose.model('Bills', billSchema)
 module.exports = Bill
